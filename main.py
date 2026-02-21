@@ -229,7 +229,7 @@ if not filtered_years:
     filtered_years = available_years
 
 # Time slider
-st.subheader("📅 Time Control")
+st.subheader("Time Control")
 selected_year = st.select_slider(
     "Select Year",
     options=filtered_years,
@@ -274,7 +274,7 @@ if not st.session_state.presentation_mode:
 
 # Analysis Summary
 if not st.session_state.presentation_mode:
-    with st.expander("📋 **Current Analysis Summary**", expanded=False):
+    with st.expander("**Current Analysis Summary**", expanded=False):
         col1, col2 = st.columns(2)
 
         with col1:
@@ -293,7 +293,7 @@ if not st.session_state.presentation_mode:
             st.write(f"• **Clustering**: {'✅ Yes' if st.session_state.show_clusters else '❌ No'}")
 
         st.divider()
-        st.markdown("**💾 Export Options:**")
+        st.markdown("**Export Options:**")
 
         # Export buttons
         col1, col2 = st.columns(2)
@@ -335,7 +335,7 @@ Display Options:
 """
 
             st.download_button(
-                label="📄 Download Analysis Summary",
+                label="Download Analysis Summary",
                 data=summary_text,
                 file_name=f"analysis_summary_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
                 mime="text/plain",
@@ -365,7 +365,7 @@ tab1, tab2, tab3 = st.tabs(["🗺️ Global Map View", "📊 Compare Countries",
 with tab1:
     # Help box for map
     if not st.session_state.presentation_mode:
-        with st.expander("❓ **How to Read This Map**"):
+        with st.expander("**How to Read This Map**"):
             st.markdown("""
             **3D Globe Visualization:**
             - **Column Height**: Taller columns = higher absolute inflation
