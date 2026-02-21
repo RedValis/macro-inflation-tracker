@@ -20,7 +20,7 @@ from analytics import (
 set_page_config()
 
 # ---- Main App ----
-st.title("🌍 Global Inflation Tracker")
+st.title("Global Inflation Tracker")
 
 # Apply presentation mode styling if enabled
 if 'presentation_mode' in st.session_state and st.session_state.presentation_mode:
@@ -76,10 +76,10 @@ if 'show_clusters' not in st.session_state:
 
 # Sidebar controls
 with st.sidebar:
-    st.header("📊 Controls & Filters")
+    st.header("Controls & Filters")
 
     # Region filter
-    st.subheader("🌎 Region Filter")
+    st.subheader("Region Filter")
     all_regions = sorted(set(COUNTRY_REGIONS.values()))
     selected_regions = st.multiselect(
         "Select regions",
@@ -92,19 +92,19 @@ with st.sidebar:
     st.divider()
 
     # Date range filter
-    st.subheader("📆 Date Range Filter")
+    st.subheader("Date Range Filter")
     col1, col2 = st.columns(2)
     with col1:
         year_from = st.selectbox(
             "From Year",
-            options=available_years[::-1],  # Ascending order
+            options=available_years[::-1],
             index=0,
             help="Start of date range"
         )
     with col2:
         year_to = st.selectbox(
             "To Year",
-            options=available_years[::-1],  # Ascending order
+            options=available_years[::-1],
             index=len(available_years) - 1,
             help="End of date range"
         )
@@ -114,7 +114,6 @@ with st.sidebar:
 
     st.divider()
 
-    # Apply filters to get filtered countries
     filtered_countries = all_countries.copy()
     if selected_regions:
         filtered_countries = [
@@ -122,8 +121,7 @@ with st.sidebar:
             if COUNTRY_REGIONS.get(c) in selected_regions
         ]
 
-    # Country selection
-    st.subheader("🌐 Country Selection")
+    st.subheader("Country Selection")
     selected_country = st.selectbox(
         "Select a country",
         options=['None'] + filtered_countries,
@@ -138,8 +136,7 @@ with st.sidebar:
 
     st.divider()
 
-    # Risk highlighting controls
-    st.subheader("⚠️ Risk Highlighting")
+    st.subheader("Risk Highlighting")
 
     highlight_high = st.checkbox(
         "Highlight High Inflation",
@@ -168,8 +165,7 @@ with st.sidebar:
 
     st.divider()
 
-    # Chart options
-    st.subheader("📈 Chart Options")
+    st.subheader("Chart Options")
     show_rolling = st.checkbox(
         "Show 3-year rolling average",
         value=st.session_state.show_rolling_avg,
@@ -179,8 +175,7 @@ with st.sidebar:
 
     st.divider()
 
-    # Advanced Analytics
-    st.subheader("🔬 Advanced Analytics")
+    st.subheader("Advanced Analytics")
 
     show_clusters = st.checkbox(
         "Show Country Clusters",
@@ -191,8 +186,7 @@ with st.sidebar:
 
     st.divider()
 
-    # Presentation Mode
-    st.subheader("🎬 Display Mode")
+    st.subheader("Display Mode")
 
     presentation_mode = st.checkbox(
         "Presentation Mode",
@@ -202,7 +196,7 @@ with st.sidebar:
     st.session_state.presentation_mode = presentation_mode
 
     if presentation_mode:
-        st.info("📺 Presentation mode active - optimized for display")
+        st.info("Presentation mode active - optimized for display")
 
     st.divider()
 
@@ -214,23 +208,22 @@ with st.sidebar:
 
     st.divider()
     st.markdown("""
-    ### 🎨 Color Legend
+    ### Color Legend
     **Year-on-year Inflation (%)**
-    - 🔵 **Blue**: Deflation (< 0%)
-    - 🟢 **Green**: Low (0-2%)
-    - 🟡 **Yellow**: Moderate (2-5%)
-    - 🟠 **Orange**: High (5-10%)
-    - 🔴 **Red**: Very High (> 10%)
+    - Blue: Deflation (< 0%)
+    - Green: Low (0-2%)
+    - Yellow: Moderate (2-5%)
+    - Orange: High (5-10%)
+    - Red: Very High (> 10%)
 
     **Special Highlighting** (when enabled):
-    - 🟣 **Magenta**: High inflation alert
-    - 🔷 **Cyan**: Deflation alert
-    - ⭐ **Bright Yellow**: Selected country
+    - Magenta: High inflation alert
+    - Cyan: Deflation alert
+    - Bright Yellow: Selected country
 
     **Column Height**: Represents inflation magnitude
     """)
 
-# Filter available years based on date range
 filtered_years = [y for y in available_years if year_from <= y <= year_to]
 if not filtered_years:
     filtered_years = available_years
