@@ -210,16 +210,16 @@ with st.sidebar:
     st.markdown("""
     ### Color Legend
     **Year-on-year Inflation (%)**
-    - Blue: Deflation (< 0%)
-    - Green: Low (0-2%)
-    - Yellow: Moderate (2-5%)
-    - Orange: High (5-10%)
-    - Red: Very High (> 10%)
+    - 🔵 **Blue**: Deflation (< 0%)
+    - 🟢 **Green**: Low (0-2%)
+    - 🟡 **Yellow**: Moderate (2-5%)
+    - 🟠 **Orange**: High (5-10%)
+    - 🔴 **Red**: Very High (> 10%)
 
     **Special Highlighting** (when enabled):
-    - Magenta: High inflation alert
-    - Cyan: Deflation alert
-    - Bright Yellow: Selected country
+    - 🟣 **Magenta**: High inflation alert
+    - 🔷 **Cyan**: Deflation alert
+    - ⭐ **Bright Yellow**: Selected country
 
     **Column Height**: Represents inflation magnitude
     """)
@@ -468,7 +468,7 @@ with tab1:
             showlegend=False,
             height=400
         )
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_hist, width='stretch')
 
     with col2:
         # Box plot
@@ -483,7 +483,7 @@ with tab1:
             showlegend=False,
             height=400
         )
-        st.plotly_chart(fig_box, use_container_width=True)
+        st.plotly_chart(fig_box, width='stretch')
 
 with tab2:
     # Help box
@@ -603,7 +603,7 @@ with tab2:
                 )
             )
 
-            st.plotly_chart(fig_compare, use_container_width=True)
+            st.plotly_chart(fig_compare, width='stretch')
 
             # Summary statistics for comparison
             st.subheader(" Comparison Statistics")
@@ -799,7 +799,7 @@ with tab3:
                     showlegend=False
                 )
 
-                st.plotly_chart(fig_calc, use_container_width=True)
+                st.plotly_chart(fig_calc, width='stretch')
 
                 # Show price index
                 with st.expander(" View Price Index Details"):
@@ -997,7 +997,7 @@ if st.session_state.selected_country:
             showlegend=True
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
         # Data table for selected country
         with st.expander(" View Historical Data"):
@@ -1069,12 +1069,12 @@ if not st.session_state.presentation_mode:
 
         with col2:
             st.markdown("**Display Options:**")
-            st.write(f"• **High Inflation Alert**: {' Yes' if st.session_state.highlight_high_inflation else ' No'}")
+            st.write(f"• **High Inflation Alert**: {'✅ Yes' if st.session_state.highlight_high_inflation else '❌ No'}")
             if st.session_state.highlight_high_inflation:
                 st.write(f"  → Threshold: {st.session_state.high_inflation_threshold}%")
-            st.write(f"• **Deflation Alert**: {' Yes' if st.session_state.highlight_deflation else ' No'}")
-            st.write(f"• **Rolling Average**: {' Yes' if st.session_state.show_rolling_avg else ' No'}")
-            st.write(f"• **Clustering**: {' Yes' if st.session_state.show_clusters else ' No'}")
+            st.write(f"• **Deflation Alert**: {'✅ Yes' if st.session_state.highlight_deflation else '❌ No'}")
+            st.write(f"• **Rolling Average**: {'✅ Yes' if st.session_state.show_rolling_avg else '❌ No'}")
+            st.write(f"• **Clustering**: {'✅ Yes' if st.session_state.show_clusters else '❌ No'}")
 
         st.divider()
         st.markdown("**Export Options:**")
