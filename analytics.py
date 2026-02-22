@@ -8,7 +8,16 @@ from config import COUNTRY_COORDS, COUNTRY_REGIONS
 
 
 def prepare_map_data(df, year):
-    """Prepare data for PyDeck visualization"""
+    """
+    Prepare data for PyDeck 3D visualization.
+    
+    Args:
+        df: DataFrame containing inflation data
+        year: Year to filter and prepare data for
+        
+    Returns:
+        DataFrame with coordinates, colors, and elevation data for map visualization
+    """
     # Filter for selected year
     year_data = df[df['year'] == year].copy()
 
@@ -20,8 +29,8 @@ def prepare_map_data(df, year):
     year_data = year_data.dropna(subset=['lat', 'lon'])
 
     # Add color based on inflation rate
-    # Color scheme: Blue (low) -> Yellow (medium) -> Red (high)
     def get_color(inflation):
+        """Color scheme: Blue (deflation) -> Green (low) -> Yellow (moderate) -> Orange (high) -> Red (very high)"""
         if inflation < 0:
             return [0, 100, 255, 200]  # Blue for deflation
         elif inflation < 2:
@@ -36,20 +45,32 @@ def prepare_map_data(df, year):
     year_data['color'] = year_data['inflation'].apply(get_color)
 
     # Elevation (height) based on inflation value
-    # Use absolute value and scale it appropriately
     year_data['elevation'] = year_data['inflation'].abs() * 10000
 
     return year_data
 
 
 def generate_insights(map_data, inflation_df, selected_year, selected_regions, selected_country=None):
+    """
+    Generate automatic insights based on current data selection and filters.
+    
+    Args:
+        map_data: Prepared map data for the selected year
+        inflation_df: Full inflation dataset
+        selected_year: Currently selected year
+        selected_regions: List of selected regions for filtering
+        selected_country: Optional selected country for detailed analysis
+        
+    Returns:
+        List of insight strings formatted in markdown
+    """
     insights = []
 
     # Regional insight
     if selected_regions:
         region_avg = map_data['inflation'].mean()
         insights.append(
-            f"💡 **Regional Analysis**: In {selected_year}, the selected regions have an average inflation rate of **{region_avg:.2f}%**."
+            f"**Regional Analysis**: In {selected_year}, the selected regions have an average inflation rate of **{region_avg:.2f}%**."
         )
 
     # Highest region
@@ -66,7 +87,7 @@ def generate_insights(map_data, inflation_df, selected_year, selected_regions, s
             region_avgs = {r: sum(v) / len(v) for r, v in region_inflations.items()}
             highest_region = max(region_avgs, key=region_avgs.get)
             insights.append(
-                f"🌍 **Geographic Pattern**: **{highest_region}** has the highest average inflation ({region_avgs[highest_region]:.2f}%) in {selected_year}."
+                f"**Geographic Pattern**: **{highest_region}** has the highest average inflation ({region_avgs[highest_region]:.2f}%) in {selected_year}."
             )
 
     # Trend insight for selected country
@@ -95,20 +116,21 @@ def generate_insights(map_data, inflation_df, selected_year, selected_regions, s
                 trend_word = "remained relatively stable"
 
             insights.append(
-                f"📈 **Trend Alert**: Inflation in **{selected_country}** has generally **{trend_word}** over the available period."
+                f"**Trend Alert**: Inflation in **{selected_country}** has generally **{trend_word}** over the available period."
             )
 
-    # Risk alert
+    # Risk alert - High inflation
     high_inflation_count = len(map_data[map_data['inflation'] > 10])
     if high_inflation_count > 0:
         insights.append(
-            f"⚠️ **High Inflation Alert**: **{high_inflation_count}** countries are experiencing inflation above 10% in {selected_year}."
+            f"**High Inflation Alert**: **{high_inflation_count}** countries are experiencing inflation above 10% in {selected_year}."
         )
 
+    # Risk alert - Deflation
     deflation_count = len(map_data[map_data['inflation'] < 0])
     if deflation_count > 0:
         insights.append(
-            f"❄️ **Deflation Alert**: **{deflation_count}** countries are experiencing deflation in {selected_year}."
+            f"**Deflation Alert**: **{deflation_count}** countries are experiencing deflation in {selected_year}."
         )
 
     return insights
@@ -116,7 +138,18 @@ def generate_insights(map_data, inflation_df, selected_year, selected_regions, s
 
 def calculate_adjusted_value(country, start_year, end_year, initial_amount, inflation_data):
     """
-    Calculate inflation-adjusted value using compound inflation
+    Calculate inflation-adjusted value using compound inflation methodology.
+    
+    Args:
+        country: Country name
+        start_year: Starting year for calculation
+        end_year: Ending year for calculation
+        initial_amount: Initial monetary value in local currency
+        inflation_data: DataFrame containing inflation data
+        
+    Returns:
+        tuple: (DataFrame with year, price_index, adjusted_value columns, final adjusted value)
+        (None, None): If insufficient data available
     """
     country_data = inflation_data[
         (inflation_data['country'] == country) &
@@ -155,7 +188,15 @@ def calculate_adjusted_value(country, start_year, end_year, initial_amount, infl
 
 def cluster_countries(inflation_data, n_clusters=4):
     """
-    Cluster countries based on their inflation time series patterns
+    Cluster countries based on their inflation time series patterns using K-means algorithm.
+    
+    Args:
+        inflation_data: DataFrame containing inflation data
+        n_clusters: Number of clusters to create (default: 4)
+        
+    Returns:
+        tuple: (cluster_map dictionary, pivot_data DataFrame)
+        None: If insufficient data for clustering
     """
     # Create pivot table with countries as rows and years as columns
     pivot_data = inflation_data.pivot_table(
@@ -187,7 +228,16 @@ def cluster_countries(inflation_data, n_clusters=4):
 
 def find_similar_countries(target_country, inflation_data, top_n=5):
     """
-    Find countries with similar inflation patterns to the target country
+    Find countries with similar inflation patterns using cosine similarity.
+    
+    Args:
+        target_country: Country to find similarities for
+        inflation_data: DataFrame containing inflation data
+        top_n: Number of similar countries to return (default: 5)
+        
+    Returns:
+        Series: Top N similar countries with similarity scores
+        None: If target country not found or insufficient data
     """
     # Create pivot table
     pivot_data = inflation_data.pivot_table(
@@ -219,6 +269,12 @@ def find_similar_countries(target_country, inflation_data, top_n=5):
 
 def calculate_volatility(country_data):
     """
-    Calculate inflation volatility (standard deviation)
+    Calculate inflation volatility using standard deviation.
+    
+    Args:
+        country_data: DataFrame containing inflation data for a single country
+        
+    Returns:
+        float: Standard deviation of inflation rates
     """
     return country_data['inflation'].std()

@@ -248,102 +248,6 @@ if selected_regions:
 
 st.divider()
 
-# About section (collapsible in presentation mode)
-if not st.session_state.presentation_mode:
-    with st.expander("ℹ️ **About This App**", expanded=False):
-        st.markdown("""
-        ### Welcome to the Global Inflation Tracker
-
-        This comprehensive tool allows you to:
-        - **Visualize** inflation rates across countries using an interactive 3D globe
-        - **Compare** inflation trends between multiple countries over time
-        - **Calculate** inflation-adjusted values to understand purchasing power changes
-        - **Analyze** patterns with advanced clustering and similarity detection
-        - **Export** data and charts for your own analysis
-
-        **Data Source**: World Bank API - Inflation, consumer prices (annual %)  
-        **Methodology**: Year-over-year percentage change in consumer price index
-
-        **How to Use**:
-        1. Use filters in the sidebar to focus on specific regions and time periods
-        2. Explore the map to see global inflation patterns
-        3. Select countries for detailed analysis and comparisons
-        4. Use the calculator to see how inflation affects purchasing power
-        5. Export your findings for presentations or reports
-        """)
-
-# Analysis Summary
-if not st.session_state.presentation_mode:
-    with st.expander("**Current Analysis Summary**", expanded=False):
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("**Filters Applied:**")
-            st.write(f"• **Regions**: {', '.join(selected_regions) if selected_regions else 'All Regions'}")
-            st.write(f"• **Date Range**: {year_from} - {year_to}")
-            st.write(f"• **Countries Shown**: {len(filtered_countries)}")
-
-        with col2:
-            st.markdown("**Display Options:**")
-            st.write(f"• **High Inflation Alert**: {'✅ Yes' if st.session_state.highlight_high_inflation else '❌ No'}")
-            if st.session_state.highlight_high_inflation:
-                st.write(f"  → Threshold: {st.session_state.high_inflation_threshold}%")
-            st.write(f"• **Deflation Alert**: {'✅ Yes' if st.session_state.highlight_deflation else '❌ No'}")
-            st.write(f"• **Rolling Average**: {'✅ Yes' if st.session_state.show_rolling_avg else '❌ No'}")
-            st.write(f"• **Clustering**: {'✅ Yes' if st.session_state.show_clusters else '❌ No'}")
-
-        st.divider()
-        st.markdown("**Export Options:**")
-
-        # Export buttons
-        col1, col2 = st.columns(2)
-
-        with col1:
-            # Prepare filtered data for export
-            export_data = filtered_inflation_df[
-                (filtered_inflation_df['year'] >= year_from) &
-                (filtered_inflation_df['year'] <= year_to)
-            ].sort_values(['country', 'year'])
-
-            csv = export_data.to_csv(index=False)
-            st.download_button(
-                label="📥 Download Filtered Data (CSV)",
-                data=csv,
-                file_name=f"inflation_data_{year_from}_{year_to}.csv",
-                mime="text/csv",
-                help="Download the currently filtered dataset"
-            )
-
-        with col2:
-            # Analysis summary text export
-            summary_text = f"""Global Inflation Analysis Summary
-Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}
-
-Filters Applied:
-- Regions: {', '.join(selected_regions) if selected_regions else 'All Regions'}
-- Date Range: {year_from} - {year_to}
-- Countries: {len(filtered_countries)}
-
-Selected Country: {st.session_state.selected_country if st.session_state.selected_country else 'None'}
-Comparison Countries: {', '.join(st.session_state.compare_countries) if st.session_state.compare_countries else 'None'}
-
-Display Options:
-- High Inflation Alert: {'Yes' if st.session_state.highlight_high_inflation else 'No'}
-- Deflation Alert: {'Yes' if st.session_state.highlight_deflation else 'No'}
-- Rolling Average: {'Yes' if st.session_state.show_rolling_avg else 'No'}
-- Clustering: {'Yes' if st.session_state.show_clusters else 'No'}
-"""
-
-            st.download_button(
-                label="Download Analysis Summary",
-                data=summary_text,
-                file_name=f"analysis_summary_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
-                mime="text/plain",
-                help="Download a summary of your current analysis settings"
-            )
-
-st.divider()
-
 # Show insights
 insights = generate_insights(
     prepare_map_data(filtered_inflation_df, selected_year),
@@ -353,14 +257,14 @@ insights = generate_insights(
     selected_country=st.session_state.selected_country
 )
 if insights:
-    with st.expander("💡 **Automatic Insights**", expanded=True):
+    with st.expander(" **Automatic Insights**", expanded=True):
         for insight in insights:
             st.markdown(insight)
 
 st.divider()
 
 # Create tabs for different views
-tab1, tab2, tab3 = st.tabs(["🗺️ Global Map View", "📊 Compare Countries", "🧮 Inflation Calculator"])
+tab1, tab2, tab3 = st.tabs([" Global Map View", " Compare Countries", " Inflation Calculator"])
 
 with tab1:
     # Help box for map
@@ -374,15 +278,15 @@ with tab1:
             - **Rotation**: Click and drag to rotate the globe
 
             **Special Highlighting:**
-            - 🟣 **Magenta**: High inflation countries (when alert enabled)
-            - 🔷 **Cyan**: Deflation countries (when alert enabled)
-            - ⭐ **Yellow**: Your selected country
-            - 🎨 **Cluster Colors**: When clustering is enabled, similar countries share colors
+            -  **Magenta**: High inflation countries (when alert enabled)
+            -  **Cyan**: Deflation countries (when alert enabled)
+            -  **Yellow**: Your selected country
+            -  **Cluster Colors**: When clustering is enabled, similar countries share colors
             """)
 
     # Title with presentation mode adjustment
     title_size = "h1" if st.session_state.presentation_mode else "h3"
-    st.markdown(f"<{title_size}>🗺️ Global Inflation Map - {selected_year}</{title_size}>", unsafe_allow_html=True)
+    st.markdown(f"<{title_size}> Global Inflation Map - {selected_year}</{title_size}>", unsafe_allow_html=True)
 
     # Prepare map data (with filtered data)
     map_data = prepare_map_data(filtered_inflation_df, selected_year)
@@ -479,13 +383,13 @@ with tab1:
     # Cluster legend if clustering is enabled
     if st.session_state.show_clusters:
         st.info("""
-        **🎨 Clustering Enabled**: Countries are grouped by similar inflation patterns over time.  
+        ** Clustering Enabled**: Countries are grouped by similar inflation patterns over time.  
         Countries with similar colors have similar inflation histories, regardless of geographic location.
         """)
 
     # Summary statistics
     summary_title_size = "h2" if st.session_state.presentation_mode else "h3"
-    st.markdown(f"<{summary_title_size}>📈 Global Summary for {selected_year}</{summary_title_size}>", unsafe_allow_html=True)
+    st.markdown(f"<{summary_title_size}> Global Summary for {selected_year}</{summary_title_size}>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
 
@@ -514,7 +418,7 @@ with tab1:
 
     # Top 5 tables
     st.divider()
-    st.subheader(f"🏆 Top Countries by Inflation - {selected_year}")
+    st.subheader(f" Top Countries by Inflation - {selected_year}")
 
     col1, col2 = st.columns(2)
 
@@ -546,7 +450,7 @@ with tab1:
 
     # Distribution view
     st.divider()
-    st.subheader(f"📊 Inflation Distribution - {selected_year}")
+    st.subheader(f" Inflation Distribution - {selected_year}")
 
     col1, col2 = st.columns([2, 1])
 
@@ -584,7 +488,7 @@ with tab1:
 with tab2:
     # Help box
     if not st.session_state.presentation_mode:
-        with st.expander("❓ **How to Compare Countries**"):
+        with st.expander(" **How to Compare Countries**"):
             st.markdown("""
             **Multi-Country Comparison:**
             - Select up to 10 countries to overlay their inflation trends
@@ -604,7 +508,7 @@ with tab2:
 
     # Title with presentation mode adjustment
     title_size = "h1" if st.session_state.presentation_mode else "h2"
-    st.markdown(f"<{title_size}>🔍 Multi-Country Comparison</{title_size}>", unsafe_allow_html=True)
+    st.markdown(f"<{title_size}> Multi-Country Comparison</{title_size}>", unsafe_allow_html=True)
 
     # Multi-select for countries
     compare_countries = st.multiselect(
@@ -702,7 +606,7 @@ with tab2:
             st.plotly_chart(fig_compare, use_container_width=True)
 
             # Summary statistics for comparison
-            st.subheader("📊 Comparison Statistics")
+            st.subheader(" Comparison Statistics")
 
             stats_data = []
             for country in compare_countries:
@@ -741,7 +645,7 @@ with tab2:
 with tab3:
     # Help box
     if not st.session_state.presentation_mode:
-        with st.expander("❓ **How the Calculator Works**"):
+        with st.expander(" **How the Calculator Works**"):
             st.markdown("""
             **Inflation-Adjusted Value Calculator:**
 
@@ -771,7 +675,7 @@ with tab3:
 
     # Title with presentation mode adjustment
     title_size = "h1" if st.session_state.presentation_mode else "h2"
-    st.markdown(f"<{title_size}>🧮 Inflation-Adjusted Value Calculator</{title_size}>", unsafe_allow_html=True)
+    st.markdown(f"<{title_size}> Inflation-Adjusted Value Calculator</{title_size}>", unsafe_allow_html=True)
 
     st.markdown("""
     Calculate how much money you would need in a future year to have the same purchasing power 
@@ -826,7 +730,7 @@ with tab3:
             )
 
             if result_df is not None and final_value is not None:
-                st.success("✅ Calculation Complete!")
+                st.success(" Calculation Complete!")
 
                 # Display result
                 col1, col2, col3 = st.columns(3)
@@ -862,7 +766,7 @@ with tab3:
                 """)
 
                 # Chart showing progression
-                st.subheader("📈 Value Progression Over Time")
+                st.subheader(" Value Progression Over Time")
 
                 fig_calc = go.Figure()
 
@@ -898,7 +802,7 @@ with tab3:
                 st.plotly_chart(fig_calc, use_container_width=True)
 
                 # Show price index
-                with st.expander("📊 View Price Index Details"):
+                with st.expander(" View Price Index Details"):
                     st.markdown(f"**Price Index** (Base 100 in {calc_start_year})")
                     index_df = result_df[['year', 'price_index', 'adjusted_value']].copy()
                     index_df.columns = ['Year', 'Price Index', 'Adjusted Value']
@@ -920,7 +824,7 @@ with tab3:
 # Country-specific analysis panel
 if st.session_state.selected_country:
     st.divider()
-    st.header(f"🔍 Country Analysis: {st.session_state.selected_country}")
+    st.header(f" Country Analysis: {st.session_state.selected_country}")
 
     # Filter data for selected country
     country_data = filtered_inflation_df[
@@ -983,7 +887,7 @@ if st.session_state.selected_country:
         # Similarity analysis
         if not st.session_state.presentation_mode:
             st.divider()
-            st.subheader("🔍 Similar Countries")
+            st.subheader(" Similar Countries")
 
             similar_countries = find_similar_countries(st.session_state.selected_country, filtered_inflation_df, top_n=5)
 
@@ -995,7 +899,7 @@ if st.session_state.selected_country:
                     similarity_data.append({
                         'Country': country,
                         'Similarity Score': f"{similarity:.3f}",
-                        'Match': '⭐⭐⭐' if similarity > 0.95 else '⭐⭐' if similarity > 0.85 else '⭐'
+                        'Match': '' if similarity > 0.95 else '' if similarity > 0.85 else ''
                     })
 
                 similarity_df = pd.DataFrame(similarity_data)
@@ -1010,12 +914,12 @@ if st.session_state.selected_country:
                     width='stretch'
                 )
 
-                st.caption("💡 Similarity is calculated using cosine similarity of inflation time series")
+                st.caption(" Similarity is calculated using cosine similarity of inflation time series")
             else:
                 st.info("Not enough data to find similar countries")
 
         # Time-series chart
-        st.subheader(f"📊 Inflation Over Time: {st.session_state.selected_country}")
+        st.subheader(f" Inflation Over Time: {st.session_state.selected_country}")
 
         # Create Plotly line chart
         fig = go.Figure()
@@ -1096,7 +1000,7 @@ if st.session_state.selected_country:
         st.plotly_chart(fig, use_container_width=True)
 
         # Data table for selected country
-        with st.expander("📋 View Historical Data"):
+        with st.expander(" View Historical Data"):
             display_country_df = country_data[['year', 'inflation']].sort_values('year', ascending=False)
             st.dataframe(
                 display_country_df,
@@ -1112,7 +1016,7 @@ if st.session_state.selected_country:
 
 # Data table (expandable) - All countries
 st.divider()
-with st.expander("📋 View All Countries Data"):
+with st.expander(" View All Countries Data"):
     display_df = map_data[['country', 'country_code', 'inflation']].sort_values(
         'inflation', ascending=False
     )
@@ -1128,11 +1032,107 @@ with st.expander("📋 View All Countries Data"):
     )
 
 
+# About section (collapsible in presentation mode)
+if not st.session_state.presentation_mode:
+    with st.expander(" **About This App**", expanded=False):
+        st.markdown("""
+        ### Welcome to the Global Inflation Tracker
+
+        This comprehensive tool allows you to:
+        - **Visualize** inflation rates across countries using an interactive 3D globe
+        - **Compare** inflation trends between multiple countries over time
+        - **Calculate** inflation-adjusted values to understand purchasing power changes
+        - **Analyze** patterns with advanced clustering and similarity detection
+        - **Export** data and charts for your own analysis
+
+        **Data Source**: World Bank API - Inflation, consumer prices (annual %)  
+        **Methodology**: Year-over-year percentage change in consumer price index
+
+        **How to Use**:
+        1. Use filters in the sidebar to focus on specific regions and time periods
+        2. Explore the map to see global inflation patterns
+        3. Select countries for detailed analysis and comparisons
+        4. Use the calculator to see how inflation affects purchasing power
+        5. Export your findings for presentations or reports
+        """)
+
+# Analysis Summary
+if not st.session_state.presentation_mode:
+    with st.expander("**Current Analysis Summary**", expanded=False):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("**Filters Applied:**")
+            st.write(f"• **Regions**: {', '.join(selected_regions) if selected_regions else 'All Regions'}")
+            st.write(f"• **Date Range**: {year_from} - {year_to}")
+            st.write(f"• **Countries Shown**: {len(filtered_countries)}")
+
+        with col2:
+            st.markdown("**Display Options:**")
+            st.write(f"• **High Inflation Alert**: {' Yes' if st.session_state.highlight_high_inflation else ' No'}")
+            if st.session_state.highlight_high_inflation:
+                st.write(f"  → Threshold: {st.session_state.high_inflation_threshold}%")
+            st.write(f"• **Deflation Alert**: {' Yes' if st.session_state.highlight_deflation else ' No'}")
+            st.write(f"• **Rolling Average**: {' Yes' if st.session_state.show_rolling_avg else ' No'}")
+            st.write(f"• **Clustering**: {' Yes' if st.session_state.show_clusters else ' No'}")
+
+        st.divider()
+        st.markdown("**Export Options:**")
+
+        # Export buttons
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # Prepare filtered data for export
+            export_data = filtered_inflation_df[
+                (filtered_inflation_df['year'] >= year_from) &
+                (filtered_inflation_df['year'] <= year_to)
+            ].sort_values(['country', 'year'])
+
+            csv = export_data.to_csv(index=False)
+            st.download_button(
+                label=" Download Filtered Data (CSV)",
+                data=csv,
+                file_name=f"inflation_data_{year_from}_{year_to}.csv",
+                mime="text/csv",
+                help="Download the currently filtered dataset"
+            )
+
+        with col2:
+            # Analysis summary text export
+            summary_text = f"""Global Inflation Analysis Summary
+Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+
+Filters Applied:
+- Regions: {', '.join(selected_regions) if selected_regions else 'All Regions'}
+- Date Range: {year_from} - {year_to}
+- Countries: {len(filtered_countries)}
+
+Selected Country: {st.session_state.selected_country if st.session_state.selected_country else 'None'}
+Comparison Countries: {', '.join(st.session_state.compare_countries) if st.session_state.compare_countries else 'None'}
+
+Display Options:
+- High Inflation Alert: {'Yes' if st.session_state.highlight_high_inflation else 'No'}
+- Deflation Alert: {'Yes' if st.session_state.highlight_deflation else 'No'}
+- Rolling Average: {'Yes' if st.session_state.show_rolling_avg else 'No'}
+- Clustering: {'Yes' if st.session_state.show_clusters else 'No'}
+"""
+
+            st.download_button(
+                label="Download Analysis Summary",
+                data=summary_text,
+                file_name=f"analysis_summary_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
+                mime="text/plain",
+                help="Download a summary of your current analysis settings"
+            )
+
+st.divider()
+
 # Footer
 st.divider()
 st.markdown("""
 <small>
-💡 **About this app:** This application uses the World Bank API to fetch real-time inflation data. 
+ **About this app:** This application uses the World Bank API to fetch real-time inflation data. 
 Use the time slider to explore different years, and select a country to see detailed statistics and trends.
 Hover over countries on the map to see their inflation rates.
 </small>
