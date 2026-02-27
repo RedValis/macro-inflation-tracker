@@ -31,34 +31,15 @@ Track **year-on-year inflation rates** (consumer prices, annual %) across countr
 Data is sourced from the **World Bank API** and visualized using an interactive 3D globe.
 """)
 
-# Fetch data
-with st.spinner("Fetching inflation data from World Bank API..."):
-    inflation_df = fetch_inflation_data()
-
-if inflation_df is None or inflation_df.empty:
-    st.error("Unable to fetch inflation data. Please try again later.")
-    st.stop()
-
-# Get available years
-available_years = sorted(inflation_df['year'].unique(), reverse=True)
-latest_year = available_years[0]
-earliest_year = available_years[-1]
-
-# Get list of countries with coordinates
-all_countries = sorted([
-    country for country in inflation_df['country'].unique()
-    if country in COUNTRY_COORDS
-])
-
 # Initialize session state
 if 'selected_country' not in st.session_state:
     st.session_state.selected_country = None
 if 'selected_regions' not in st.session_state:
     st.session_state.selected_regions = []
 if 'year_from' not in st.session_state:
-    st.session_state.year_from = earliest_year
+    st.session_state.year_from = None  # Will be set after data loads
 if 'year_to' not in st.session_state:
-    st.session_state.year_to = latest_year
+    st.session_state.year_to = None  # Will be set after data loads
 if 'compare_countries' not in st.session_state:
     st.session_state.compare_countries = []
 if 'highlight_high_inflation' not in st.session_state:
@@ -73,6 +54,36 @@ if 'presentation_mode' not in st.session_state:
     st.session_state.presentation_mode = False
 if 'show_clusters' not in st.session_state:
     st.session_state.show_clusters = False
+if 'force_refresh' not in st.session_state:
+    st.session_state.force_refresh = False
+
+# Fetch data with caching support
+with st.spinner("Loading inflation data..."):
+    inflation_df = fetch_inflation_data(force_refresh=st.session_state.force_refresh)
+    # Reset force_refresh flag after data is loaded
+    if st.session_state.force_refresh:
+        st.session_state.force_refresh = False
+
+if inflation_df is None or inflation_df.empty:
+    st.error("Unable to fetch inflation data. Please try again later.")
+    st.stop()
+
+# Get available years
+available_years = sorted(inflation_df['year'].unique(), reverse=True)
+latest_year = available_years[0]
+earliest_year = available_years[-1]
+
+# Set default year range if not already set
+if st.session_state.year_from is None:
+    st.session_state.year_from = earliest_year
+if st.session_state.year_to is None:
+    st.session_state.year_to = latest_year
+
+# Get list of countries with coordinates
+all_countries = sorted([
+    country for country in inflation_df['country'].unique()
+    if country in COUNTRY_COORDS
+])
 
 # Sidebar controls
 with st.sidebar:
@@ -205,6 +216,19 @@ with st.sidebar:
     **Indicator:** Inflation, consumer prices (annual %)  
     **Last Updated:** {datetime.now().strftime('%Y-%m-%d')}
     """)
+    
+    # Refresh data button
+    import os
+    cache_exists = os.path.exists("inflation_data_cache.csv")
+    
+    if st.button("🔄 Refresh Data from API", use_container_width=True):
+        st.session_state.force_refresh = True
+        st.rerun()
+    
+    if cache_exists:
+        st.caption("Using cached data. Click above to fetch latest from API.")
+    else:
+        st.caption("No cache found. Data will be fetched from API.")
 
     st.divider()
     st.markdown("""

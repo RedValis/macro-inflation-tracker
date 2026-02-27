@@ -38,17 +38,54 @@ def apply_presentation_mode_css():
 
 
 @st.cache_data(ttl=3600)
-def fetch_inflation_data():
+def fetch_inflation_data(force_refresh=False):
     """
-    Fetch inflation data from World Bank API with pagination handling.
+    Fetch inflation data from World Bank API with local CSV caching.
+    
+    Historical data (2010-2023) is cached locally and only fetched once.
+    Current year (2024) can be updated by forcing a refresh.
+    
+    Args:
+        force_refresh: If True, forces re-download from API even if CSV exists
+        
+    Returns:
+        pd.DataFrame: DataFrame containing country, country_code, year, and inflation columns
+        None: If data fetch fails or no data is available
     """
+    import os
+    
+    # Define cache file path
+    cache_file = "inflation_data_cache.csv"
+    
+    # Check if cached data exists and force_refresh is False
+    if os.path.exists(cache_file) and not force_refresh:
+        try:
+            st.info("Loading data from local cache...")
+            df = pd.read_csv(cache_file)
+            
+            # Display cache info
+            unique_countries = df['country'].nunique()
+            total_records = len(df)
+            year_range = f"{df['year'].min()}-{df['year'].max()}"
+            
+            st.success(
+                f"Data loaded from cache: {total_records:,} records across "
+                f"{unique_countries} countries ({year_range})"
+            )
+            
+            return df
+            
+        except Exception as e:
+            st.warning(f"Failed to load cached data: {str(e)}. Fetching from API...")
+            # Continue to API fetch below
+    
+    # Fetch from API
     try:
         url = "https://api.worldbank.org/v2/country/all/indicator/FP.CPI.TOTL.ZG"
         all_records = []
         page = 1
         per_page = 1000
 
-        # Temporary status placeholder
         status_placeholder = st.empty()
 
         while True:
@@ -79,25 +116,43 @@ def fetch_inflation_data():
             total_pages = metadata.get('pages', 1)
             current_page = metadata.get('page', 1)
 
-            # Update loading status
-            status_placeholder.info(f"Loading data: Page {current_page} of {total_pages}")
+            status_placeholder.info(f"Fetching from API: Page {current_page} of {total_pages}")
 
             if page >= total_pages:
                 break
 
             page += 1
 
-        # Clear the loading message once done
         status_placeholder.empty()
 
         if not all_records:
+            st.error("No data received from World Bank API")
             return None
 
         df = pd.DataFrame(all_records)
+        
+        # Save to CSV cache
+        try:
+            df.to_csv(cache_file, index=False)
+            st.success(f"Data cached locally to {cache_file}")
+        except Exception as e:
+            st.warning(f"Could not save cache file: {str(e)}")
+        
+        # Display success info
+        unique_countries = df['country'].nunique()
+        total_records = len(df)
+        year_range = f"{df['year'].min()}-{df['year'].max()}"
+        
+        st.success(
+            f"Data fetched from API: {total_records:,} records across "
+            f"{unique_countries} countries ({year_range})"
+        )
+        
         return df
 
     except requests.exceptions.RequestException as e:
         st.error(f"Network error while fetching data: {str(e)}")
+        st.error("Please check your internet connection and try again")
         return None
 
     except Exception as e:
